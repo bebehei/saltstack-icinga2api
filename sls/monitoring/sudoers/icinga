@@ -1,0 +1,1 @@
+nagios ALL=(root)NOPASSWD:/usr/sbin/smartctl,/usr/lib/nagios/plugins/check_dhcp
