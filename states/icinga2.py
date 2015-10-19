@@ -130,6 +130,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 				ret['changes']["NodeName"]['new'] = True
 				node_ok = True
 			elif node_r.match(line) and (node_r.match(line).group(1) == master):
+				newlines.append(line)
 				node_ok = True
 			elif zone_r.match(line) and not (zone_r.match(line).group(1) == master):
 				print "change line zone from %s to %s" % (zone_r.match(line).group(1), master)
@@ -139,6 +140,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 				ret['changes']["ZoneName"]['new'] = True
 				zone_ok = True
 			elif zone_r.match(line) and (zone_r.match(line).group(1) == master):
+				newlines.append(line)
 				zone_ok = True
 			elif salt_r.match(line) and salt_r.match(line).group(1) == '':
 				print "change line salt " + salt_r.match(line).group(1)
@@ -149,6 +151,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 				ret['changes']["TicketSalt"]['new'] = True
 				salt_ok = True
 			elif salt_r.match(line) and not salt_r.match(line).group(1) == '':
+				newlines.append(line)
 				salt_ok = True
 			else:
 				newlines.append(line)
