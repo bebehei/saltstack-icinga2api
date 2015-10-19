@@ -198,8 +198,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 	return ret
 
 
-def client(name, ticket, client, client_zone=None, master_zone=None, port=default_port, overwrite=False):
-
+def client(name, ticket, master=None, client=None, client_zone=None, master_zone=None, port=default_port, overwrite=False):
 	def ensure_dir(f):
 		d = os.path.dirname(f)
 		if not os.path.exists(d):
@@ -211,6 +210,11 @@ def client(name, ticket, client, client_zone=None, master_zone=None, port=defaul
 	ret['result'] = True
 	ret['comment'] = "No changes were made."
 
+	if client is None:
+		client = __grains__['host']
+
+	if master is None:
+		master = name
 	if master_zone is None:
 		master_zone = name
 	if client_zone is None:
@@ -219,7 +223,6 @@ def client(name, ticket, client, client_zone=None, master_zone=None, port=defaul
 		ret['result'] = False
 		return ret
 
-	master = name
 
 	key_client_pub = pkibase + client + ".pub"
 	key_client_pri = pkibase + client + ".key"
