@@ -31,6 +31,11 @@ object Zone "master" {
 }"""
 
 def master(name, master=None, master_zone=None, port=default_port, overwrite=False):
+	def ensure_dir(f):
+		d = os.path.dirname(f)
+		if not os.path.exists(d):
+			ensure_dir(d)
+			os.makedirs(d)
 	ret = {}
 	ret['name'] = name
 	ret['changes'] = {}
@@ -49,6 +54,9 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 
 	key_master_ca_crt = "/var/lib/icinga2/ca/ca.crt"
 	key_master_ca_key = "/var/lib/icinga2/ca/ca.key"
+
+	ensure_dir(key_master_csr)
+	os.fchown(pkibase, pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
 
 	try:
 		if overwrite or not (os.path.isfile(key_master_ca_crt) and os.path.isfile(key_master_ca_key)):
@@ -192,6 +200,11 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 
 def client(name, ticket, client, client_zone=None, master_zone=None, port=default_port, overwrite=False):
 
+	def ensure_dir(f):
+		d = os.path.dirname(f)
+		if not os.path.exists(d):
+			ensure_dir(d)
+			os.makedirs(d)
 	ret = {}
 	ret['name'] = name
 	ret['changes'] = {}
@@ -220,6 +233,10 @@ def client(name, ticket, client, client_zone=None, master_zone=None, port=defaul
 		ret['result'] = False
 		ret['comment'] = "No ticket to pass to master."
 		return ret
+
+	ensure_dir(key_client_crt)
+	os.fchown(pkibase, pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
+
 	try:
 		# activate the API plugin
 		if None is re.compile(r'^Enabled.*api', re.MULTILINE).search(
@@ -310,10 +327,6 @@ def client(name, ticket, client, client_zone=None, master_zone=None, port=defaul
 			], stderr=subprocess.STDOUT)
 			
 			ret['comment'] = "Icinga2 setup successfully finished!"
-
-		# Finally give the permissions back to the icinga2-user
-		# TODO
-		#os.fchown(pkibase, pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
 
 	except subprocess.CalledProcessError as e:
 		ret['result'] = False
