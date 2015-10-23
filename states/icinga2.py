@@ -56,7 +56,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 	key_master_ca_key = "/var/lib/icinga2/ca/ca.key"
 
 	ensure_dir(key_master_csr)
-	os.fchown(pkibase, pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
+	os.fchown(os.open( pkibase, os.O_RDONLY ), pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
 
 	try:
 		if overwrite or not (os.path.isfile(key_master_ca_crt) and os.path.isfile(key_master_ca_key)):
@@ -238,7 +238,8 @@ def client(name, ticket, master=None, client=None, client_zone=None, master_zone
 		return ret
 
 	ensure_dir(key_client_crt)
-	os.fchown(pkibase, pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
+	os.fchown(os.open( pkibase, os.O_RDONLY ), pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
+
 
 	try:
 		# activate the API plugin
