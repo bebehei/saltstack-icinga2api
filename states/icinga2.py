@@ -194,7 +194,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 
 	except subprocess.CalledProcessError as e:
 		ret['result'] = False
-		ret['comment'] = "Icinga2 setup failed at step '{0}' with output:\n\n{1}".format(e.cmd, e.output)
+		ret['comment'] = "Icinga2 setup failed at step '{0}' with output:\n\n{1}".format(' '.join(e.cmd), e.output)
 	return ret
 
 
@@ -333,7 +333,7 @@ def client(name, ticket, master=None, client=None, client_zone=None, master_zone
 
 	except subprocess.CalledProcessError as e:
 		ret['result'] = False
-		ret['comment'] = "Icinga2 setup failed at step '{0}' with output:\n\n{1}".format(e.cmd, e.output)
+		ret['comment'] = "Icinga2 setup failed at step '{0}' with output:\n\n{1}".format(' '.join(e.cmd), e.output)
 		return ret
 
 	return ret
