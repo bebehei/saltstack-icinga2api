@@ -9,15 +9,16 @@ import shutil
 
 import salt.exceptions
 
-# change this, if you're not on a debian host
-default_port=5665
-icinga2_user="nagios"
-icinga2_group="nagios"
-dirbase="/etc/icinga2/"
-pkibase=dirbase + "pki/"
+config = {
+  'port': 5665,
+  'user': 'nagios',
+  'group': 'nagios',
+  'dirbase': '/etc/icinga2',
+  'pkibase': '/etc/icinga2/pki',
+}
 
-file_constants = dirbase + "constants.conf"
-file_zones = dirbase + "zones.conf"
+file_constants = config['dirbase'] + "/constants.conf"
+file_zones = config['dirbase'] + "/zones.conf"
 
 #use this string in conjunction with printf
 # replace with the following variables
@@ -30,7 +31,7 @@ object Zone "master" {
         endpoints = [ "%s" ]
 }"""
 
-def master(name, master=None, master_zone=None, port=default_port, overwrite=False):
+def master(name, master=None, master_zone=None, port=config['port'], overwrite=False):
 	def ensure_dir(f):
 		d = os.path.dirname(f)
 		if not os.path.exists(d):
@@ -47,16 +48,16 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 	if master is None:
 		master = name
 
-	key_master_pub = pkibase + master + ".pub"
-	key_master_pri = pkibase + master + ".key"
-	key_master_crt = pkibase + master + ".crt"
-	key_master_csr = pkibase + master + ".csr"
+	key_master_pub = config['pkibase'] + "/" + master + ".pub"
+	key_master_pri = config['pkibase'] + "/" + master + ".key"
+	key_master_crt = config['pkibase'] + "/" + master + ".crt"
+	key_master_csr = config['pkibase'] + "/" + master + ".csr"
 
 	key_master_ca_crt = "/var/lib/icinga2/ca/ca.crt"
 	key_master_ca_key = "/var/lib/icinga2/ca/ca.key"
 
 	ensure_dir(key_master_csr)
-	os.fchown(os.open( pkibase, os.O_RDONLY ), pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
+	os.fchown(os.open( config['pkibase'], os.O_RDONLY ), pwd.getpwnam(config['user']).pw_uid, grp.getgrnam(config['group']).gr_gid)
 
 	try:
 		if overwrite or not (os.path.isfile(key_master_ca_crt) and os.path.isfile(key_master_ca_key)):
@@ -68,7 +69,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 				"new-ca",
 			], stderr=subprocess.STDOUT)
 
-			shutil.copyfile(key_master_ca_crt, pkibase + "ca.crt")
+			shutil.copyfile(key_master_ca_crt, config['pkibase'] + "/ca.crt")
 
 			ret['changes'][key_master_ca_key]['new'] = os.path.isfile(key_master_ca_key)
 			ret['changes'][key_master_ca_crt]['new'] = os.path.isfile(key_master_ca_crt)
@@ -198,7 +199,7 @@ def master(name, master=None, master_zone=None, port=default_port, overwrite=Fal
 	return ret
 
 
-def client(name, ticket, master=None, client=None, client_zone=None, master_zone=None, port=default_port, overwrite=False):
+def client(name, ticket, master=None, client=None, client_zone=None, master_zone=None, port=config['port'], overwrite=False):
 	def ensure_dir(f):
 		d = os.path.dirname(f)
 		if not os.path.exists(d):
@@ -224,12 +225,12 @@ def client(name, ticket, master=None, client=None, client_zone=None, master_zone
 		return ret
 
 
-	key_client_pub = pkibase + client + ".pub"
-	key_client_pri = pkibase + client + ".key"
-	key_client_crt = pkibase + client + ".crt"
-	key_master_crt = pkibase + "trusted_master.crt"
+	key_client_pub = config['pkibase'] + "/" + client + ".pub"
+	key_client_pri = config['pkibase'] + "/" + client + ".key"
+	key_client_crt = config['pkibase'] + "/" + client + ".crt"
+	key_master_crt = config['pkibase'] + "/trusted_master.crt"
 
-	ca_crt = pkibase + "ca.crt"
+	ca_crt = config['pkibase'] + "/ca.crt"
 
 	# TODO: neccessary?
 	if ticket is None or ticket is "":
@@ -238,8 +239,7 @@ def client(name, ticket, master=None, client=None, client_zone=None, master_zone
 		return ret
 
 	ensure_dir(key_client_crt)
-	os.fchown(os.open( pkibase, os.O_RDONLY ), pwd.getpwnam(icinga2_user).pw_uid, grp.getgrnam(icinga2_group).gr_gid)
-
+	os.fchown(os.open( config['pkibase'], os.O_RDONLY ), pwd.getpwnam(config['user']).pw_uid, grp.getgrnam(config['group']).gr_gid)
 
 	try:
 		# activate the API plugin
