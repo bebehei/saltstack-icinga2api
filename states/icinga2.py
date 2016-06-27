@@ -134,9 +134,9 @@ def master(name, master=None, master_zone=None, port=config['port'], overwrite=F
 			if node_r.match(line) and not (node_r.match(line).group(1) == master):
 				print "change line node from %s to %s" % (node_r.match(line).group(1), master)
 				write_file = True
-				ret['changes']["NodeName"] = {'old': False}
+				ret['changes']["NodeName"] = {'old': node_r.match(line).group(1)}
 				newlines.append('const NodeName = "{node}"\n'.format(node=master))
-				ret['changes']["NodeName"]['new'] = True
+				ret['changes']["NodeName"]['new'] = master
 				node_ok = True
 			elif node_r.match(line) and (node_r.match(line).group(1) == master):
 				newlines.append(line)
@@ -144,9 +144,9 @@ def master(name, master=None, master_zone=None, port=config['port'], overwrite=F
 			elif zone_r.match(line) and not (zone_r.match(line).group(1) == master):
 				print "change line zone from %s to %s" % (zone_r.match(line).group(1), master)
 				write_file = True
-				ret['changes']["ZoneName"] = {'old': False}
+				ret['changes']["ZoneName"] = {'old': zone_r.match(line).group(1)}
 				newlines.append('const ZoneName = "{zone}"\n'.format(zone=master))
-				ret['changes']["ZoneName"]['new'] = True
+				ret['changes']["ZoneName"]['new'] = master
 				zone_ok = True
 			elif zone_r.match(line) and (zone_r.match(line).group(1) == master):
 				newlines.append(line)
@@ -154,10 +154,10 @@ def master(name, master=None, master_zone=None, port=config['port'], overwrite=F
 			elif salt_r.match(line) and salt_r.match(line).group(1) == '':
 				print "change line salt " + salt_r.match(line).group(1)
 				write_file = True
-				ret['changes']["TicketSalt"] = {'old': False}
+				ret['changes']["TicketSalt"] = {'old': salt_r.match(line).group(1)}
 				myRand = ''.join(random.choice(string.ascii_letters + string.digits) for i in range(16))
 				newlines.append('const TicketSalt = "{salt}"\n'.format(salt=myRand))
-				ret['changes']["TicketSalt"]['new'] = True
+				ret['changes']["TicketSalt"]['new'] = myRand
 				salt_ok = True
 			elif salt_r.match(line) and not salt_r.match(line).group(1) == '':
 				newlines.append(line)
